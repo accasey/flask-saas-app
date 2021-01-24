@@ -210,3 +210,68 @@ docker rm ID1 ID2
 ```
 
 https://net2.com/how-to-clean-up-unused-docker-containers-images-and-volumes/
+
+
+## Configuration Settings
+
+In the `create_app()` function in the `app.py` file there are a few lines for configuration settings:
+
+```python
+    app = Flask(__name__, instance_relative_config=True)
+
+    app.config.from_object("src.config.settings")
+    app.config.from_pyfile("settings.py", silent=True)
+```
+
+* `instance_relative_config`: This parameter in the FLask constructor is (apparently) telling Flask to look for an instance directory at the same level as snakeeyes.
+* `app.config.from_object()`: This method is loading a configuration file, note the module/directories.
+    * Should be committed to version control.
+    * Should **not** have anything private in there.
+* `app.config.from_pyfile()`: This method will load the `setttings.py` file from the `instance` directory (apparently).
+    * Excluded from version control
+    * Contains private information, e.g.
+        * API keys
+        * mail logins
+        * non-development database passwords
+    * Values in this file with overwrite the non-instance settings.
+    * You can use an example file, so long as it does not contain any *real* information
+        * e.g. `settings.py_production_example` has `DEBUG = False`
+
+In the `settings.py` file you can add in environment variables, and then reference them in the code. 
+
+For example:
+
+```python
+# in the settings.py file
+HELLO = "Hello World?"
+
+# in the app.py file
+return app.config["HELLO"]
+```
+
+I had some issues with this in Docker (and possibly natively, e.g. poetry run flask run - I did not check).
+
+with `silent=False` being passed to the `app.config.from_pyfile()` method, I could see that it was not handling the directory structure very well.
+
+So instead of using `instance_relative_config=True` in the `Flask` constructor, I used `instance_path="/snakeeyes"` as this is the directory used in Docker, i.e. off `root`.
+
+Then I had to point the pyfile with a relative path as it was resolving to `/snakeeyes/src/snakeeyes/settings.py` instead of `/snakeeyes/src/instance/settings.py`. So go back up a directory and use the instance directory.
+
+```python
+app.config.from_pyfile("../instance/settings.py", silent=False) 
+```
+
+Thanks to the Flask documentation as well:
+https://flask.palletsprojects.com/en/1.1.x/config/
+
+
+## Removing the docker containers
+
+```bash
+docker-compose rm -f
+```
+
+Also run this periodically to clean up disk space
+```bash
+docker rmi -f $(docker images -qf dangling=true)
+```

@@ -7,10 +7,11 @@ def create_app():
 
     :return: Flask app
     """
-    app = Flask(__name__, instance_relative_config=True)
+    # app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_path="/snakeeyes")
 
     app.config.from_object("src.config.settings")
-    app.config.from_pyfile("settings.py", silent=True)
+    app.config.from_pyfile("../instance/settings.py", silent=False) # instance settings
 
     @app.route("/")
     def index():
@@ -19,6 +20,6 @@ def create_app():
 
         :return: Flask response
         """
-        return "<h1>Hello World<h1>"
+        return app.config["HELLO"]
 
     return app
