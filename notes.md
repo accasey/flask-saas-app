@@ -186,6 +186,9 @@ But I could not get the `tool.poetry.scripts` to work.
 I needed to modify the `docker-compose.yml` and `Dockerfile` files by adding `src`:
 * docker-compose.yml: line 10 - `"src.snakeeyes.app:create_app()"`
 * Dockerfile: line 18 - `CMD gunicorn -b 0.0.0.0:8000 --access-logfile - "src.snakeeyes.app:create_app()"`
+```bash
+docker-compose up
+```
 
 You can use some docker commands to inspect the contents of the `/snakeeyes` directory:
 
@@ -275,3 +278,32 @@ Also run this periodically to clean up disk space
 ```bash
 docker rmi -f $(docker images -qf dangling=true)
 ```
+
+# Blueprints and Jinja 2 Templates
+
+* Blueprints allow you to break your app into components
+* An admin blueprint could be namespaced to `/admin` easily
+* Templates and routes would be neatly contained
+* You can easily share code between Blueprints as they are python modules.
+
+## Deciding on a look for the application
+
+* Using Bootstrap
+* Using Font Awesome: 
+    * a CSS library 
+    * instead of Bootstrap glyph icons
+
+## Creating the homepage
+
+He has a blueprints/page/templates/page/home.html file. The second 'page' is there in case you used templates/page/home.html.
+The blueprint version would override this (apparently).
+
+`block`'s are like variables and are swapped out at runtime. If they are missing then they are ignored.
+
+
+# Testing and Code Quality
+
+Changes to the `requirements.txt` file:
+1. pytest
+1. pytest-cov
+1. flake8
