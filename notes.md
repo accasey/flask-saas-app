@@ -306,4 +306,37 @@ The blueprint version would override this (apparently).
 Changes to the `requirements.txt` file:
 1. pytest
 1. pytest-cov
-1. flake8
+1. flake8 (already added to poetry)
+
+Nick uses `docker-compose up --build` as there are new dependencies which need to be installed.
+* Not sure this really needs to be in Docker?
+* He is using `docker-compose exec website` to enter the container shell and execute the tests.
+
+The `conftest.py` is used by pytest. 
+* I imagine it specifically looks for this file in a similar way to flask looking for the `app.py` file.
+
+The decorator with the scope=session is executed once at the beginning of the test run.
+The decorator with the scope=function is executed once at the beginning of the test.
+
+The `create_app()` function in the main `app.py` file has been modified by adding a parameter called `settings_override`.
+* This is a dictionary used in the session decorator above to set DEBUG to False and TESTING to True.
+
+
+## Module Not Found issues
+
+I have the `tests` directory inside the `snakeeyes` directory, and every time I ran `pytest` it would error with module not found issues.
+* This seems to be an issue with the `src` high-level directory and/or something I am doing.
+
+To get around this I have modified the following files by inserting the directory into the `src` directory into `sys.path`:
+* `src/snakeeyes/app.py`: 
+    * Added this `sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))`
+    * Modified `app.config.from_object("src.config.settings")` by removing the `src.`
+* `src/snakeeyes/blueprints/page/__init__.py`: removed the `src.` from the beginning of the path
+* `src/snakeeyes/tests/conftest.py`:
+    * `sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))`
+    * I also modified the `yield app` to `yield _app` as I was receiving errors related to the `app.client_app` in all the tests.
+
+This is now working using both `docker-compose` and `poetry`:
+* `docker-compose up`
+* `docker-compose exec website py.test src/snakeeyes/tests`
+* `poetry run pytest src/snakeeyes/tests`

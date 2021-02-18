@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "/home/andrew/.cache/pypoetry/virtualenvs/saas-app-8fCqZg8I-py3.8/bin/python"
+    "python.pythonPath": "/home/andrew/.cache/pypoetry/virtualenvs/saas-app-8fCqZg8I-py3.8/bin/python",
+    "python.formatting.provider": "black",
+    "python.formatting.blackPath": "/home/andrew/.cache/pypoetry/virtualenvs/saas-app-8fCqZg8I-py3.8/bin/black"
 }
